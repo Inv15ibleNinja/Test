@@ -17,37 +17,49 @@ namespace Test
             fm1.destinationPath = @"D:\";
             Console.WriteLine("Добро пожаловать!\nДля копирования файлов введите путь к исходному и конечному каталогу и выберите необходимые параметры.");
             Console.WriteLine("Путь к исходной папке: ");
-            fm1.sourcePath += Console.Read();
+            fm1.sourcePath = string.Copy(Console.ReadLine());
             Console.WriteLine("Путь к конечной папке: ");
-            fm1.destinationPath += Console.Read();
-            //Console.Clear();
-            Console.WriteLine("Выберите параметры копирования: ");
+            fm1.destinationPath = string.Copy(Console.ReadLine());
+            Console.WriteLine(fm1.sourcePath+"->"+fm1.destinationPath);
 
 
-            DirectoryInfo dirInfo = new DirectoryInfo(fm1.sourcePath);
+            
 
-            foreach (FileInfo file in dirInfo.GetFiles("*.*"))
-            {
-                try
-                {
-                    File.Copy(file.FullName, fm1.destinationPath + "\\" + file.Name, true);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Ошибочка вышла" + ex.Message);
-                }
-            }
+            DirectoryInfo diSource = new DirectoryInfo(fm1.sourcePath);
+            DirectoryInfo diTarget = new DirectoryInfo(fm1.destinationPath);
 
-
-            //f.sourcePath="";
-            /*try{
-                File.Copy(f.sourcePath, f.destinationPath, true);
-            }
-            catch (IOException copyError){
-                Console.WriteLine(copyError.Message);
-            }*/
-
+            Copy(diSource, diTarget);
         }
+        public static void Copy(DirectoryInfo source, DirectoryInfo target)
+        {
+            if (source.FullName.ToLower() == target.FullName.ToLower())
+            {
+                return;
+            }
+
+            // Check if the target directory exists, if not, create it.
+            if (Directory.Exists(target.FullName) == false)
+            {
+                Directory.CreateDirectory(target.FullName);
+            }
+
+            // Copy each file into it's new directory.
+            foreach (FileInfo fi in source.GetFiles())
+            {
+                Console.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
+                fi.CopyTo(Path.Combine(target.ToString(), fi.Name), true);
+            }
+
+            // Copy each subdirectory using recursion.
+            foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+            {
+                DirectoryInfo nextTargetSubDir =
+                    target.CreateSubdirectory(diSourceSubDir.Name);
+                Copy(diSourceSubDir, nextTargetSubDir);
+            }
+        }
+
+        
     }
 }
 
